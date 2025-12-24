@@ -1,0 +1,15 @@
+# System files
+__pycache__/
+*.pyc
+
+# Raw Data (Too large for Git, and already imported into DB)
+*.xlsx
+*.csv
+*Update Status.csv
+
+# Browser recording artifacts (from agent session)
+*.webm
+*.webp
+
+# User specific config?
+.streamlit/secrets.toml
