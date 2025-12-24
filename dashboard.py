@@ -89,7 +89,11 @@ if st.button("Update Analysis"):
     with st.spinner("Querying database..."):
         df_chart = get_chart_data(start_date, end_date, selected_pools)
 
-        # --- Stacked Area Chart (Well Status) ---
+        # --- Chart Type Selection ---
+        col_type, _ = st.columns([1, 4])
+        chart_type = col_type.radio("Chart Type", ["Stacked Area", "Stacked Bar"], horizontal=True)
+
+        # --- Stacked Chart (Well Status) ---
         st.subheader("Well Status Over Time")
         
         # Color Palette Definition
@@ -107,21 +111,31 @@ if st.button("Update Analysis"):
             "Unknown": "#6c757d"   # Grey
         }
 
-        # Sorting status to ensure consistent stacking order (Active usually at bottom or top?)
-        # Let's stack such that Active is foundation? Or AB on top? 
-        # Plotly handles this automatically, but custom order helps.
+        # Sorting status to ensure consistent stacking order
         category_orders = {"status": ["A", "IA 1 - A", "IA 2 - A", "IA", "AB"]}
 
-        fig = px.area(
-            df_chart, 
-            x="month", 
-            y="well_count", 
-            color="status",
-            color_discrete_map=color_map,
-            category_orders=category_orders,
-            title="Well Count by Status (Stacked)",
-            labels={"well_count": "Number of Wells", "month": "Date", "status": "Status"}
-        )
+        if chart_type == "Stacked Bar":
+            fig = px.bar(
+                df_chart, 
+                x="month", 
+                y="well_count", 
+                color="status",
+                color_discrete_map=color_map,
+                category_orders=category_orders,
+                title="Well Count by Status (Stacked Bar)",
+                labels={"well_count": "Number of Wells", "month": "Date", "status": "Status"}
+            )
+        else:
+            fig = px.area(
+                df_chart, 
+                x="month", 
+                y="well_count", 
+                color="status",
+                color_discrete_map=color_map,
+                category_orders=category_orders,
+                title="Well Count by Status (Stacked Area)",
+                labels={"well_count": "Number of Wells", "month": "Date", "status": "Status"}
+            )
         
         st.plotly_chart(fig, use_container_width=True)
 
@@ -134,20 +148,30 @@ if st.button("Update Analysis"):
         col2.metric("Avg Active Wells", f"{avg_wells:,.0f}")
         col3.metric("Data Points", f"{len(df_chart)}")
 
-        # --- Area Chart for Production ---
-        # User requested coloring different categories for a stacked area chart.
-        # Maybe they want Production by Status too?
+        # --- Chart for Production ---
         st.subheader("Oil Production by Status")
-        fig2 = px.area(
-            df_chart, 
-            x="month", 
-            y="total_oil", 
-            color="status",
-            color_discrete_map=color_map,
-            category_orders=category_orders,
-            title="Oil Production by Status (Stacked)",
-             labels={"total_oil": "Oil Production (bbls)", "month": "Date", "status": "Status"}
-        )
+        if chart_type == "Stacked Bar":
+             fig2 = px.bar(
+                df_chart, 
+                x="month", 
+                y="total_oil", 
+                color="status",
+                color_discrete_map=color_map,
+                category_orders=category_orders,
+                title="Oil Production by Status (Stacked Bar)",
+                 labels={"total_oil": "Oil Production (bbls)", "month": "Date", "status": "Status"}
+            )
+        else:
+            fig2 = px.area(
+                df_chart, 
+                x="month", 
+                y="total_oil", 
+                color="status",
+                color_discrete_map=color_map,
+                category_orders=category_orders,
+                title="Oil Production by Status (Stacked Area)",
+                 labels={"total_oil": "Oil Production (bbls)", "month": "Date", "status": "Status"}
+            )
         st.plotly_chart(fig2, use_container_width=True)
 
 else:
